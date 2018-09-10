@@ -1,4 +1,4 @@
-package selfie_app.ibrahim.selfie.com.selfie_app;
+package com.selfie.ibrahim.selfie_app;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("selfie_app.ibrahim.selfie.com.selfie_app", appContext.getPackageName());
+        assertEquals("com.selfie.ibrahim.selfie_app", appContext.getPackageName());
     }
 }

@@ -1,4 +1,4 @@
-package selfie_app.ibrahim.selfie.com.selfie_app;
+package com.selfie.ibrahim.selfie_app;
 
 import org.junit.Test;
 

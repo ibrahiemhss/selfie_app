@@ -20,7 +20,9 @@ import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.os.SystemClock;
 import android.util.Log;
+
 import org.tensorflow.lite.Interpreter;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -37,21 +39,19 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 /** Classifies images with Tensorflow Lite. */
-class ImageClassifier {
+public class ImageClassifier {
 
   /** Tag for the {@link Log}. */
   private static final String TAG = "TfLiteCameraDemo";
 
   /** Name of the model file stored in Assets. */
-  //private static final String MODEL_PATH = "graph.tflite";
+  private static final String MODEL_PATH = "my_graph.tflite";
 
   /** Name of the label file stored in Assets. */
-  private static final String LABEL_PATH = "labels.txt";
-  private static final String MODEL_PATH="graph.tflite";
+  private static final String LABEL_PATH = "hand_labels.txt";
+
   /** Number of results to show in the UI. */
   private static final int RESULTS_TO_SHOW = 3;
-  private static int digit = -1;
-  private static float  prob = 0.0f;
 
   /** Dimensions of inputs. */
   private static final int DIM_BATCH_SIZE = 1;
@@ -85,22 +85,22 @@ class ImageClassifier {
   private static final float FILTER_FACTOR = 0.4f;
 
   private PriorityQueue<Map.Entry<String, Float>> sortedLabels =
-          new PriorityQueue<>(
-                  RESULTS_TO_SHOW,
-                  new Comparator<Map.Entry<String, Float>>() {
-                    @Override
-                    public int compare(Map.Entry<String, Float> o1, Map.Entry<String, Float> o2) {
-                      return (o1.getValue()).compareTo(o2.getValue());
-                    }
-                  });
+      new PriorityQueue<>(
+          RESULTS_TO_SHOW,
+          new Comparator<Map.Entry<String, Float>>() {
+            @Override
+            public int compare(Map.Entry<String, Float> o1, Map.Entry<String, Float> o2) {
+              return (o1.getValue()).compareTo(o2.getValue());
+            }
+          });
 
   /** Initializes an {@code ImageClassifier}. */
   ImageClassifier(Activity activity) throws IOException {
     tflite = new Interpreter(loadModelFile(activity));
     labelList = loadLabelList(activity);
     imgData =
-            ByteBuffer.allocateDirect(
-                    4 * DIM_BATCH_SIZE * DIM_IMG_SIZE_X * DIM_IMG_SIZE_Y * DIM_PIXEL_SIZE);
+        ByteBuffer.allocateDirect(
+            4 * DIM_BATCH_SIZE * DIM_IMG_SIZE_X * DIM_IMG_SIZE_Y * DIM_PIXEL_SIZE);
     imgData.order(ByteOrder.nativeOrder());
     labelProbArray = new float[1][labelList.size()];
     filterLabelProbArray = new float[FILTER_STAGES][labelList.size()];
@@ -135,14 +135,14 @@ class ImageClassifier {
     // Low pass filter `labelProbArray` into the first stage of the filter.
     for(int j=0; j<num_labels; ++j){
       filterLabelProbArray[0][j] += FILTER_FACTOR*(labelProbArray[0][j] -
-              filterLabelProbArray[0][j]);
+                                                   filterLabelProbArray[0][j]);
     }
     // Low pass filter each stage into the next.
     for (int i=1; i<FILTER_STAGES; ++i){
       for(int j=0; j<num_labels; ++j){
         filterLabelProbArray[i][j] += FILTER_FACTOR*(
                 filterLabelProbArray[i-1][j] -
-                        filterLabelProbArray[i][j]);
+                filterLabelProbArray[i][j]);
 
       }
     }
@@ -163,7 +163,7 @@ class ImageClassifier {
   private List<String> loadLabelList(Activity activity) throws IOException {
     List<String> labelList = new ArrayList<String>();
     BufferedReader reader =
-            new BufferedReader(new InputStreamReader(activity.getAssets().open(LABEL_PATH)));
+        new BufferedReader(new InputStreamReader(activity.getAssets().open(LABEL_PATH)));
     String line;
     while ((line = reader.readLine()) != null) {
       labelList.add(line);
@@ -208,7 +208,7 @@ class ImageClassifier {
   private String printTopKLabels() {
     for (int i = 0; i < labelList.size(); ++i) {
       sortedLabels.add(
-              new AbstractMap.SimpleEntry<>(labelList.get(i), labelProbArray[0][i]));
+          new AbstractMap.SimpleEntry<>(labelList.get(i), labelProbArray[0][i]));
       if (sortedLabels.size() > RESULTS_TO_SHOW) {
         sortedLabels.poll();
       }

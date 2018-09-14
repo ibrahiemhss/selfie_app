@@ -1,11 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-project.buildDir = 'gradleBuild'
-getProject().setBuildDir('gradleBuild')
-project.ext.ASSET_DIR = projectDir.toString() + '/assets'
-
-assert file(project.ext.ASSET_DIR + "/rounded_graph.pb").exists()
-assert file(project.ext.ASSET_DIR + "/retrained_labels.txt").exists()
 
 buildscript {
     

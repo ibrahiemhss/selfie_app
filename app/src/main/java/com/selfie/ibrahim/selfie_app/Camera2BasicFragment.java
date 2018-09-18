@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.media.MediaPlayer;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.content.Context;
@@ -263,6 +264,9 @@ public class Camera2BasicFragment extends Fragment
    *
    * @param text The message to show
    */
+  private MediaPlayer mPlayer1;
+  private MediaPlayer mPlayer2;
+  //TODO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   private void showToast(final String text) {
     final Activity activity = getActivity();
     if (activity != null) {
@@ -271,11 +275,12 @@ public class Camera2BasicFragment extends Fragment
                 @Override
                 public void run() {
                   mTextView.setText(text);
+
                 }
               });
     }
   }
-
+  //TODO //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /**
    * Resizes image.
    *
@@ -740,8 +745,20 @@ public class Camera2BasicFragment extends Fragment
     showToast(textToShow);
     //TODO 1=========================================================================================
     if(textToShow.contains("close hand")){
-     // takePicture();
+      mPlayer1=MediaPlayer.create(getActivity(),R.raw.camera_focus_beep);
+      mPlayer1.start();
+      if(mPlayer2!=null){
+        mPlayer2.stop();
+      }
+      Log.d(TAG,"test_catch_value =close");
 
+    }if(textToShow.contains("open hand")){
+      mPlayer2=MediaPlayer.create(getActivity(),R.raw.camera_start);
+      mPlayer2.start();
+      if(mPlayer1!=null){
+        mPlayer1.stop();
+      }
+      Log.d(TAG,"test_catch_value =open");
     }
 
     Log.e(TAG, "valueFromTensorflow " + textToShow);

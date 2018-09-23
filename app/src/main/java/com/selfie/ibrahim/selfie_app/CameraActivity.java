@@ -1,7 +1,6 @@
 
 package com.selfie.ibrahim.selfie_app;
 
-import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;

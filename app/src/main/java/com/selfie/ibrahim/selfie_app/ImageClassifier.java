@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 /** Classifies images with Tensorflow Lite. */
-public class ImageClassifier {
+class ImageClassifier {
 
   /** Tag for the {@link Log}. */
   private static final String TAG = "TfLiteCameraDemo";
@@ -87,12 +87,7 @@ public class ImageClassifier {
   private PriorityQueue<Map.Entry<String, Float>> sortedLabels =
       new PriorityQueue<>(
           RESULTS_TO_SHOW,
-          new Comparator<Map.Entry<String, Float>>() {
-            @Override
-            public int compare(Map.Entry<String, Float> o1, Map.Entry<String, Float> o2) {
-              return (o1.getValue()).compareTo(o2.getValue());
-            }
-          });
+              (o1, o2) -> (o1.getValue()).compareTo(o2.getValue()));
 
   /** Initializes an {@code ImageClassifier}. */
   ImageClassifier(Activity activity) throws IOException {
@@ -129,7 +124,7 @@ public class ImageClassifier {
     return textToShow;
   }
 
-  void applyFilter(){
+  private void applyFilter(){
     int num_labels =  labelList.size();
 
     // Low pass filter `labelProbArray` into the first stage of the filter.
@@ -148,9 +143,7 @@ public class ImageClassifier {
     }
 
     // Copy the last stage filter output back to `labelProbArray`.
-    for(int j=0; j<num_labels; ++j){
-      labelProbArray[0][j] = filterLabelProbArray[FILTER_STAGES-1][j];
-    }
+    System.arraycopy(filterLabelProbArray[FILTER_STAGES - 1], 0, labelProbArray[0], 0, num_labels);
   }
 
   /** Closes tflite to release resources. */
@@ -161,7 +154,7 @@ public class ImageClassifier {
 
   /** Reads label list from Assets. */
   private List<String> loadLabelList(Activity activity) throws IOException {
-    List<String> labelList = new ArrayList<String>();
+    List<String> labelList = new ArrayList<>();
     BufferedReader reader =
         new BufferedReader(new InputStreamReader(activity.getAssets().open(LABEL_PATH)));
     String line;
@@ -213,12 +206,12 @@ public class ImageClassifier {
         sortedLabels.poll();
       }
     }
-    String textToShow = "";
+    StringBuilder textToShow = new StringBuilder();
     final int size = sortedLabels.size();
     for (int i = 0; i < size; ++i) {
       Map.Entry<String, Float> label = sortedLabels.poll();
-      textToShow = String.format("\n%s: %4.2f",label.getKey(),label.getValue()) + textToShow;
+      textToShow.insert(0, String.format("\n%s: %4.2f", label.getKey(), label.getValue()));
     }
-    return textToShow;
+    return textToShow.toString();
   }
 }

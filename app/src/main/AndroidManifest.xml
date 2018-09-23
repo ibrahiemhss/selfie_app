@@ -5,16 +5,14 @@
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
-    <uses-sdk
-        android:minSdkVersion="21"
-        android:targetSdkVersion="25" />
+
     <application android:allowBackup="true"
         android:debuggable="true"
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:theme="@style/MaterialTheme">
 
-        <activity android:name="com.selfie.ibrahim.selfie_app.CameraActivity"
+        <activity android:name="com.selfie.ibrahim.selfie_app.open_cv.MainActivity"
             android:screenOrientation="portrait"
             android:label="@string/app_name">
             <intent-filter>

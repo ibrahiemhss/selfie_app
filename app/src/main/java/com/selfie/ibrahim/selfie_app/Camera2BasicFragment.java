@@ -10,7 +10,6 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -37,7 +36,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.v13.app.FragmentCompat;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -60,6 +58,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -271,13 +270,7 @@ public class Camera2BasicFragment extends Fragment
     final Activity activity = getActivity();
     if (activity != null) {
       activity.runOnUiThread(
-              new Runnable() {
-                @Override
-                public void run() {
-                  mTextView.setText(text);
-
-                }
-              });
+              () -> mTextView.setText(text));
     }
   }
   //TODO //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -346,18 +339,18 @@ public class Camera2BasicFragment extends Fragment
   /** Layout the preview and buttons. */
   @Override
   public View onCreateView(
-          LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+          @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     return inflater.inflate(R.layout.fragment_camera2_basic, container, false);
   }
 
   /** Connect the buttons to their event handler. */
   @Override
-  public void onViewCreated(final View view, Bundle savedInstanceState) {
+  public void onViewCreated(@NonNull final View view, Bundle savedInstanceState) {
     mTextureView = view.findViewById(R.id.texture);
     view.findViewById(R.id.info).setOnClickListener(this);
      view.findViewById(R.id.picture).setOnClickListener(this);
 
-    mTextView = (TextView) view.findViewById(R.id.text);
+    mTextView = view.findViewById(R.id.text);
   }
 
   /** Load the model and labels. */
@@ -365,7 +358,7 @@ public class Camera2BasicFragment extends Fragment
   public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
 
-    mFile = new File(getActivity().getExternalFilesDir(null), "pic.jpg");
+    mFile = new File(Objects.requireNonNull(getActivity()).getExternalFilesDir(null), "pic.jpg");
 
     try {
       mClassifier = new ImageClassifier(getActivity());
@@ -438,9 +431,9 @@ public class Camera2BasicFragment extends Fragment
   @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
   private void setUpCameraOutputs(int width, int height) {
     Activity activity = getActivity();
-    CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
+    CameraManager manager = (CameraManager) Objects.requireNonNull(activity).getSystemService(Context.CAMERA_SERVICE);
     try {
-      for (String cameraId : manager.getCameraIdList()) {
+      for (String cameraId : Objects.requireNonNull(manager).getCameraIdList()) {
         CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
 
         // We don't use a front facing camera in this sample.
@@ -552,7 +545,7 @@ public class Camera2BasicFragment extends Fragment
    * Opens the camera specified by {@link Camera2BasicFragment#mCameraId}.
    */
   private void openCamera(int width, int height) {
-    if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
+    if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), Manifest.permission.CAMERA)
             != PackageManager.PERMISSION_GRANTED) {
       requestCameraPermission();
       return;
@@ -565,7 +558,7 @@ public class Camera2BasicFragment extends Fragment
       if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
         throw new RuntimeException("Time out waiting to lock camera opening.");
       }
-      manager.openCamera(mCameraId, mStateCallback, mBackgroundHandler);
+      Objects.requireNonNull(manager).openCamera(mCameraId, mStateCallback, mBackgroundHandler);
     } catch (CameraAccessException e) {
       e.printStackTrace();
     } catch (InterruptedException e) {
@@ -660,7 +653,7 @@ public class Camera2BasicFragment extends Fragment
 
       // Here, we create a CameraCaptureSession for camera preview.
       mCameraDevice.createCaptureSession(
-          Arrays.asList(surface),
+              Collections.singletonList(surface),
           new CameraCaptureSession.StateCallback() {
 
             @Override
@@ -971,7 +964,7 @@ public class Camera2BasicFragment extends Fragment
 
     private static final String ARG_MESSAGE = "message";
 
-    public static ErrorDialog newInstance(String message) {
+    static ErrorDialog newInstance(String message) {
       ErrorDialog dialog = new ErrorDialog();
       Bundle args = new Bundle();
       args.putString(ARG_MESSAGE, message);
@@ -979,19 +972,15 @@ public class Camera2BasicFragment extends Fragment
       return dialog;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
       final Activity activity = getActivity();
       return new AlertDialog.Builder(activity)
-          .setMessage(getArguments().getString(ARG_MESSAGE))
+          .setMessage(Objects.requireNonNull(getArguments()).getString(ARG_MESSAGE))
           .setPositiveButton(
               android.R.string.ok,
-              new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                  activity.finish();
-                }
-              })
+                  (dialogInterface, i) -> activity.finish())
           .create();
     }
   }
@@ -1007,21 +996,13 @@ public class Camera2BasicFragment extends Fragment
       final android.support.v4.app.Fragment parent = getParentFragment();
       return new AlertDialog.Builder(getActivity())
               .setMessage(R.string.request_permission)
-              .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                  parent.requestPermissions(new String[]{Manifest.permission.CAMERA},
-                          REQUEST_CAMERA_PERMISSION);
-                }
-              })
+              .setPositiveButton(android.R.string.ok, (dialog, which) -> parent.requestPermissions(new String[]{Manifest.permission.CAMERA},
+                      REQUEST_CAMERA_PERMISSION))
               .setNegativeButton(android.R.string.cancel,
-                      new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                          Activity activity = parent.getActivity();
-                          if (activity != null) {
-                            activity.finish();
-                          }
+                      (dialog, which) -> {
+                        Activity activity = parent.getActivity();
+                        if (activity != null) {
+                          activity.finish();
                         }
                       })
               .create();

@@ -69,7 +69,7 @@ import java.util.concurrent.TimeUnit;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class Camera2BasicFragment extends Fragment
-        implements View.OnClickListener,ActivityCompat.OnRequestPermissionsResultCallback {
+        implements View.OnClickListener,ActivityCompat.OnRequestPermissionsResultCallback  {
 
   private static final String TAG = "Camera2BasicFragment";
 

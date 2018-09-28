@@ -4,6 +4,20 @@
 # Sets the minimum version of CMake required to build the native library.
 
 cmake_minimum_required(VERSION 3.4.1)
+set(OpenCV_DIR "/home/ibrahim/Downloads/opencv-3.4.0-android-sdk/OpenCV-android-sdk/sdk/native/jni")
+find_package(OpenCV REQUIRED java)
+include_directories(${OpenCV_INCLUDE_DIRS})
+set(CMAKE_VERBOSE_MAKEFILE on)
+
+add_library(lib_opencv SHARED IMPORTED)
+set_target_properties(lib_opencv
+            PROPERTIES IMPORTED_LOCATION
+            /home/ibrahim/Downloads/opencv-3.4.0-android-sdk/OpenCV-android-sdk/sdk/native/libs/armeabi-v7a/libopencv_java3.so)
+include_directories(/OpenCV-android-sdk/sdk/native/jni/include)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+
+
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
@@ -39,6 +53,9 @@ find_library( # Sets the name of the path variable.
 target_link_libraries( # Specifies the target library.
                        native-lib
 
+                       # OpenCV lib
+                       lib_opencv
+                       /home/ibrahim/Downloads/opencv-3.4.0-android-sdk/OpenCV-android-sdk/sdk/native/libs/armeabi-v7a/libopencv_core.a
                        # Links the target library to the log library
                        # included in the NDK.
                        ${log-lib} )

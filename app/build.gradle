@@ -7,6 +7,8 @@ assert file(project.ext.ASSET_DIR + "/graph.tflite").exists()
 assert file(project.ext.ASSET_DIR + "/labels.txt").exists()
 
 android {
+    flavorDimensions "default"
+
     compileSdkVersion 28
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -26,20 +28,52 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cppFlags "-fexceptions"
+
+                arguments '-DANDROID_TOOLCHAIN=clang'
+                cppFlags '-fexceptions', '-frtti', '-std=c++11'
+                cppFlags "-std=c++1z -frtti -fexceptions -Werror=return-type -Werror=uninitialized"
+
             }
         }
+
+        /*ndk {
+            moduleName = "app"
+            abiFilter "arm64-v8a"
+            abiFilter "x86_64"
+            abiFilter "armeabi-v7a"
+           // abiFilter "mips"
+          //  abiFilter "mips64"
+        }*/
     }
     buildTypes {
+
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+
         }
     }
+
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
+
         }
+    }
+    productFlavors {
+        armv7 {
+            ndk {
+                abiFilter "armeabi-v7a"
+            }
+        }
+        fat
     }
     sourceSets { main { jni.srcDirs = ['src/main/jni', 'src/main/jniLips/'] } }
 

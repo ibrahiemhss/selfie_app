@@ -15,10 +15,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    aaptOptions {
-        noCompress "tflite"
-        noCompress "lite"
-    }
     defaultConfig {
         applicationId "com.selfie.ibrahim.selfie_app"
         minSdkVersion 15
@@ -26,25 +22,12 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        externalNativeBuild {
-            cmake {
 
-                arguments '-DANDROID_TOOLCHAIN=clang'
-                cppFlags '-fexceptions', '-frtti', '-std=c++11'
-                cppFlags "-std=c++1z -frtti -fexceptions -Werror=return-type -Werror=uninitialized"
-
-            }
         }
 
-        /*ndk {
-            moduleName = "app"
-            abiFilter "arm64-v8a"
-            abiFilter "x86_64"
-            abiFilter "armeabi-v7a"
-           // abiFilter "mips"
-          //  abiFilter "mips64"
-        }*/
-    }
+
+
+
     buildTypes {
 
         debug {
@@ -60,30 +43,8 @@ android {
 
         }
     }
-
-    externalNativeBuild {
-        cmake {
-            path "CMakeLists.txt"
-
-        }
-    }
-    productFlavors {
-        armv7 {
-            ndk {
-                abiFilter "armeabi-v7a"
-            }
-        }
-        fat
-    }
-    sourceSets { main { jni.srcDirs = ['src/main/jni', 'src/main/jniLips/'] } }
-
-
-    gradle.projectsEvaluated {
-        tasks.withType(JavaCompile) {
-            options.compilerArgs << "-Xlint:unchecked"
-        }
-    }
 }
+
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -96,5 +57,4 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'org.tensorflow:tensorflow-lite:1.10.0'
-    implementation project(':openCVLibrary340')
 }

@@ -20,10 +20,7 @@ import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.os.SystemClock;
 import android.util.Log;
-
-import org.opencv.core.Mat;
 import org.tensorflow.lite.Interpreter;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -46,11 +43,11 @@ class ImageClassifier {
   private static final String TAG = "TfLiteCameraDemo";
 
   /** Name of the model file stored in Assets. */
-  private static final String MODEL_PATH = "graph.tflite";
+  //private static final String MODEL_PATH = "graph.tflite";
 
   /** Name of the label file stored in Assets. */
   private static final String LABEL_PATH = "labels.txt";
-
+  private static final String MODEL_PATH="graph.tflite";
   /** Number of results to show in the UI. */
   private static final int RESULTS_TO_SHOW = 3;
   private static int digit = -1;
@@ -158,13 +155,10 @@ class ImageClassifier {
 
   /** Closes tflite to release resources. */
   public void close() {
-    if(tflite!=null)
-    {
-      tflite.close();
-      tflite = null;
-    }
-
+    tflite.close();
+    tflite = null;
   }
+
   /** Reads label list from Assets. */
   private List<String> loadLabelList(Activity activity) throws IOException {
     List<String> labelList = new ArrayList<String>();
@@ -227,74 +221,4 @@ class ImageClassifier {
     }
     return textToShow;
   }
-
-
-  //classify mat
-  public void classifyMat(Mat mat) {
-
-    long startTime = SystemClock.uptimeMillis();
-    if(tflite!=null) {
-
-      convertMattoTfLiteInput(mat);
-      runInference();
-    }
-
-    long endTime = SystemClock.uptimeMillis();
-    Log.d(TAG, "Timecost to put values into ByteBuffer and run inference " + Long.toString(endTime - startTime));
-  }
-
-  //convert opencv mat to tensorflowlite input
-  private void convertMattoTfLiteInput(Mat mat)
-  {
-    if (imgData != null) {
-
-      imgData.rewind();
-      int pixel = 0;
-      for (int i = 0; i < 28; ++i) {
-        for (int j = 0; j < 28; ++j) {
-          imgData.putFloat((float)mat.get(i,j)[0]);
-
-        }
-      }
-    }
-  }
-
-
-  //run interface
-  private void runInference() {
-    Log.e(TAG, "Inference doing");
-    if(imgData != null)
-      tflite.run(imgData, labelProbArray);
-    Log.e(TAG, "Inference done "+maxProbIndex(labelProbArray[0]));
-  }
-
-  // find max prob and digit
-  private  int maxProbIndex(float[] probs) {
-    int maxIndex = -1;
-    float maxProb = 0.0f;
-    for (int i = 0; i < probs.length; i++) {
-      if (probs[i] > maxProb) {
-        maxProb = probs[i];
-        maxIndex = i;
-      }
-    }
-    prob = maxProb;
-    digit = maxIndex;
-    return maxIndex;
-  }
-
-  //get predicted digit
-  public int getdigit()
-  {
-
-    return digit;
-  }
-  //get predicted  prob
-  public float getProb()
-  {
-
-    return prob;
-  }
-
 }
-

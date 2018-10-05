@@ -55,7 +55,6 @@ target_link_libraries( # Specifies the target library.
 
                        # OpenCV lib
                        lib_opencv
-                       /home/ibrahim/Downloads/opencv-3.4.0-android-sdk/OpenCV-android-sdk/sdk/native/libs/armeabi-v7a/libopencv_core.a
                        # Links the target library to the log library
                        # included in the NDK.
                        ${log-lib} )

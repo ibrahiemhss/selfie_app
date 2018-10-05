@@ -48,11 +48,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
-import org.opencv.videoio.VideoCapture;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -86,47 +81,6 @@ public class Camera2BasicFragment extends Fragment
     ORIENTATIONS.append(Surface.ROTATION_180, 270);
     ORIENTATIONS.append(Surface.ROTATION_270, 180);
   }
-  //TODO __________________________________________________________________________________________________________
-
-  Mat preImg;
-  VideoCapture camera;
-  Mat handDetectImg ;
-  Mat canvas ;
-  Mat finalImg ;
-
-  static {
-    if (!OpenCVLoader.initDebug()) {
-      // Handle initialization error
-    } else {
-      System.loadLibrary("process");
-
-    }
-  }
-
-
-  private BaseLoaderCallback mLoaderCallback=new BaseLoaderCallback(getActivity()) {
-    @Override
-    public void onManagerConnected(int status) {
-      super.onManagerConnected(status);
-      switch(status)
-      {
-        case LoaderCallbackInterface.SUCCESS: {
-          Log.i(TAG, "OpenCV loaded successfully");
-          preImg = new Mat();
-          canvas = new Mat();
-          handDetectImg = new Mat();
-          finalImg = new Mat();
-
-        }break;
-        default:
-        {
-          super.onManagerConnected(status);
-        } break;
-      }
-    }
-  };
-
-  //TODO __________________________________________________________________________________________________________
 
   private final Object mLock = new Object();
   private boolean mRunClassifier = false;
@@ -397,6 +351,7 @@ public class Camera2BasicFragment extends Fragment
 
     mTextView = view.findViewById(R.id.text);
   }
+//TODO =============================================================================
 
   /** Load the model and labels. */
   @Override

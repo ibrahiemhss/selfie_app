@@ -1,4 +1,5 @@
 package com.selfie.ibrahim.selfie_app;
+
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.os.SystemClock;
@@ -22,15 +23,15 @@ public class Classifier {
 
     private static final String TAG = "TfLite";
     private static final int DIM_BATCH_SIZE = 1;
-    private static final int DIM_PIXEL_SIZE =1;
-    private static final int  DIM_HEIGHT =28;
+    private static final int DIM_PIXEL_SIZE = 1;
+    private static final int DIM_HEIGHT = 28;
     private static final int DIM_WIDTH = 28;
-    private static final int BYTES =4;
+    private static final int BYTES = 4;
 
     protected Interpreter tflite;
 
     private static int digit = -1;
-    private static float  prob = 0.0f;
+    private static float prob = 0.0f;
 
     protected ByteBuffer imgData = null;
     private float[][] ProbArray = null;
@@ -45,6 +46,7 @@ public class Classifier {
         ProbArray = new float[1][10];
         Log.d(TAG, " Tensorflow Lite Classifier.");
     }
+
     //load model
     private MappedByteBuffer loadModelFile(Activity activity) throws IOException {
         AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(ModelFile);
@@ -55,40 +57,41 @@ public class Classifier {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
 
-   /* //classify mat
-    public void classifyMat(Mat mat) {
+    /* //classify mat
+     public void classifyMat(Mat mat) {
 
-        long startTime = SystemClock.uptimeMillis();
-        if(tflite!=null) {
+         long startTime = SystemClock.uptimeMillis();
+         if(tflite!=null) {
 
-            convertMattoTfLiteInput(mat);
-            runInference();
-        }
+             convertMattoTfLiteInput(mat);
+             runInference();
+         }
 
-        long endTime = SystemClock.uptimeMillis();
-        Log.d(TAG, "Timecost to put values into ByteBuffer and run inference " + Long.toString(endTime - startTime));
-    }
-    //convert opencv mat to tensorflowlite input
-    private void convertMattoTfLiteInput(Mat mat)
-    {
-        imgData.rewind();
-        int pixel = 0;
-        for (int i = 0; i < DIM_HEIGHT; ++i) {
-            for (int j = 0; j < DIM_WIDTH; ++j) {
-                imgData.putFloat((float)mat.get(i,j)[0]);
-            }
-        }
-    }
-*/
+         long endTime = SystemClock.uptimeMillis();
+         Log.d(TAG, "Timecost to put values into ByteBuffer and run inference " + Long.toString(endTime - startTime));
+     }
+     //convert opencv mat to tensorflowlite input
+     private void convertMattoTfLiteInput(Mat mat)
+     {
+         imgData.rewind();
+         int pixel = 0;
+         for (int i = 0; i < DIM_HEIGHT; ++i) {
+             for (int j = 0; j < DIM_WIDTH; ++j) {
+                 imgData.putFloat((float)mat.get(i,j)[0]);
+             }
+         }
+     }
+ */
     //run interface
     private void runInference() {
         Log.e(TAG, "Inference doing");
-        if(imgData != null)
+        if (imgData != null)
             tflite.run(imgData, ProbArray);
-        Log.e(TAG, "Inference done "+maxProbIndex(ProbArray[0]));
+        Log.e(TAG, "Inference done " + maxProbIndex(ProbArray[0]));
     }
+
     // find max prob and digit
-    private  int maxProbIndex(float[] probs) {
+    private int maxProbIndex(float[] probs) {
         int maxIndex = -1;
         float maxProb = 0.0f;
         for (int i = 0; i < probs.length; i++) {
@@ -101,22 +104,22 @@ public class Classifier {
         digit = maxIndex;
         return maxIndex;
     }
+
     //get predicted digit
-    public int getdigit()
-    {
+    public int getdigit() {
 
         return digit;
     }
+
     //get predicted  prob
-    public float getProb()
-    {
+    public float getProb() {
 
         return prob;
     }
+
     //close interface
     public void close() {
-        if(tflite!=null)
-        {
+        if (tflite != null) {
             tflite.close();
             tflite = null;
         }

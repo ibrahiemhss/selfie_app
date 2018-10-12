@@ -4,7 +4,6 @@ import android.content.res.AssetFileDescriptor;
 import android.os.SystemClock;
 import android.util.Log;
 
-import org.opencv.core.Mat;
 import org.tensorflow.lite.Interpreter;
 
 import java.io.FileInputStream;
@@ -35,7 +34,8 @@ public class Classifier {
 
     protected ByteBuffer imgData = null;
     private float[][] ProbArray = null;
-    protected String ModelFile = "mnist.tflite";
+    protected String ModelFile = "graph.tflite";
+
 
     //allocate buffer and create interface
     Classifier(Activity activity) throws IOException {
@@ -55,7 +55,7 @@ public class Classifier {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
 
-    //classify mat
+   /* //classify mat
     public void classifyMat(Mat mat) {
 
         long startTime = SystemClock.uptimeMillis();
@@ -79,7 +79,7 @@ public class Classifier {
             }
         }
     }
-
+*/
     //run interface
     private void runInference() {
         Log.e(TAG, "Inference doing");

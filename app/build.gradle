@@ -3,12 +3,10 @@ apply plugin: 'com.android.application'
 
 project.ext.ASSET_DIR = projectDir.toString() + '/src/main/assets'
 
-assert file(project.ext.ASSET_DIR + "/mnist.tflite").exists()
-assert file(project.ext.ASSET_DIR + "/test2_labels.txt").exists()
+assert file(project.ext.ASSET_DIR + "/graph.tflite").exists()
+assert file(project.ext.ASSET_DIR + "/labels.txt").exists()
 
 android {
-
-
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.selfie.ibrahim.selfie_app"
@@ -17,24 +15,19 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
-    buildTypes {
 
-        release {
-            minifyEnabled true
-        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-    }
+
     }
 
     aaptOptions {
         noCompress "tflite"
         noCompress "lite"
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
 }
 
 dependencies {
@@ -47,5 +40,4 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'org.tensorflow:tensorflow-lite:1.10.0'
-    implementation project(':openCVLibrary341')
 }

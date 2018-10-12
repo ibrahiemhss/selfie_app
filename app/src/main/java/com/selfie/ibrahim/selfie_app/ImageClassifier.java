@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.os.SystemClock;
 import android.util.Log;
 
+//import org.opencv.core.Mat;
 import org.tensorflow.lite.Interpreter;
 
 import java.io.BufferedReader;
@@ -45,13 +46,15 @@ class ImageClassifier {
   private static final String TAG = "TfLiteCameraDemo";
 
   /** Name of the model file stored in Assets. */
-  private static final String MODEL_PATH = "test2_graph.tflite";
+  private static final String MODEL_PATH = "graph.tflite";
 
   /** Name of the label file stored in Assets. */
-  private static final String LABEL_PATH = "test2_labels.txt";
+  private static final String LABEL_PATH = "labels.txt";
 
   /** Number of results to show in the UI. */
   private static final int RESULTS_TO_SHOW = 3;
+  private static int digit = -1;
+  private static float  prob = 0.0f;
 
   /** Dimensions of inputs. */
   private static final int DIM_BATCH_SIZE = 1;
@@ -85,17 +88,22 @@ class ImageClassifier {
   private static final float FILTER_FACTOR = 0.4f;
 
   private PriorityQueue<Map.Entry<String, Float>> sortedLabels =
-      new PriorityQueue<>(
-          RESULTS_TO_SHOW,
-              (o1, o2) -> (o1.getValue()).compareTo(o2.getValue()));
+          new PriorityQueue<>(
+                  RESULTS_TO_SHOW,
+                  new Comparator<Map.Entry<String, Float>>() {
+                    @Override
+                    public int compare(Map.Entry<String, Float> o1, Map.Entry<String, Float> o2) {
+                      return (o1.getValue()).compareTo(o2.getValue());
+                    }
+                  });
 
   /** Initializes an {@code ImageClassifier}. */
   ImageClassifier(Activity activity) throws IOException {
     tflite = new Interpreter(loadModelFile(activity));
     labelList = loadLabelList(activity);
     imgData =
-        ByteBuffer.allocateDirect(
-            4 * DIM_BATCH_SIZE * DIM_IMG_SIZE_X * DIM_IMG_SIZE_Y * DIM_PIXEL_SIZE);
+            ByteBuffer.allocateDirect(
+                    4 * DIM_BATCH_SIZE * DIM_IMG_SIZE_X * DIM_IMG_SIZE_Y * DIM_PIXEL_SIZE);
     imgData.order(ByteOrder.nativeOrder());
     labelProbArray = new float[1][labelList.size()];
     filterLabelProbArray = new float[FILTER_STAGES][labelList.size()];
@@ -124,39 +132,44 @@ class ImageClassifier {
     return textToShow;
   }
 
-  private void applyFilter(){
+  void applyFilter(){
     int num_labels =  labelList.size();
 
     // Low pass filter `labelProbArray` into the first stage of the filter.
     for(int j=0; j<num_labels; ++j){
       filterLabelProbArray[0][j] += FILTER_FACTOR*(labelProbArray[0][j] -
-                                                   filterLabelProbArray[0][j]);
+              filterLabelProbArray[0][j]);
     }
     // Low pass filter each stage into the next.
     for (int i=1; i<FILTER_STAGES; ++i){
       for(int j=0; j<num_labels; ++j){
         filterLabelProbArray[i][j] += FILTER_FACTOR*(
                 filterLabelProbArray[i-1][j] -
-                filterLabelProbArray[i][j]);
+                        filterLabelProbArray[i][j]);
 
       }
     }
 
     // Copy the last stage filter output back to `labelProbArray`.
-    System.arraycopy(filterLabelProbArray[FILTER_STAGES - 1], 0, labelProbArray[0], 0, num_labels);
+    for(int j=0; j<num_labels; ++j){
+      labelProbArray[0][j] = filterLabelProbArray[FILTER_STAGES-1][j];
+    }
   }
 
   /** Closes tflite to release resources. */
   public void close() {
-    tflite.close();
-    tflite = null;
-  }
+    if(tflite!=null)
+    {
+      tflite.close();
+      tflite = null;
+    }
 
+  }
   /** Reads label list from Assets. */
   private List<String> loadLabelList(Activity activity) throws IOException {
-    List<String> labelList = new ArrayList<>();
+    List<String> labelList = new ArrayList<String>();
     BufferedReader reader =
-        new BufferedReader(new InputStreamReader(activity.getAssets().open(LABEL_PATH)));
+            new BufferedReader(new InputStreamReader(activity.getAssets().open(LABEL_PATH)));
     String line;
     while ((line = reader.readLine()) != null) {
       labelList.add(line);
@@ -201,17 +214,87 @@ class ImageClassifier {
   private String printTopKLabels() {
     for (int i = 0; i < labelList.size(); ++i) {
       sortedLabels.add(
-          new AbstractMap.SimpleEntry<>(labelList.get(i), labelProbArray[0][i]));
+              new AbstractMap.SimpleEntry<>(labelList.get(i), labelProbArray[0][i]));
       if (sortedLabels.size() > RESULTS_TO_SHOW) {
         sortedLabels.poll();
       }
     }
-    StringBuilder textToShow = new StringBuilder();
+    String textToShow = "";
     final int size = sortedLabels.size();
     for (int i = 0; i < size; ++i) {
       Map.Entry<String, Float> label = sortedLabels.poll();
-      textToShow.insert(0, String.format("\n%s: %4.2f", label.getKey(), label.getValue()));
+      textToShow = String.format("\n%s: %4.2f",label.getKey(),label.getValue()) + textToShow;
     }
-    return textToShow.toString();
+    return textToShow;
   }
+
+
+  /*//classify mat
+  public void classifyMat(Mat mat) {
+
+    long startTime = SystemClock.uptimeMillis();
+    if(tflite!=null) {
+
+      convertMattoTfLiteInput(mat);
+      runInference();
+    }
+
+    long endTime = SystemClock.uptimeMillis();
+    Log.d(TAG, "Timecost to put values into ByteBuffer and run inference " + Long.toString(endTime - startTime));
+  }
+
+  //convert opencv mat to tensorflowlite input
+  private void convertMattoTfLiteInput(Mat mat)
+  {
+    if (imgData != null) {
+
+      imgData.rewind();
+      int pixel = 0;
+      for (int i = 0; i < 28; ++i) {
+        for (int j = 0; j < 28; ++j) {
+          imgData.putFloat((float)mat.get(i,j)[0]);
+
+        }
+      }
+    }
+  }*/
+
+
+  //run interface
+  private void runInference() {
+    Log.e(TAG, "Inference doing");
+    if(imgData != null)
+      tflite.run(imgData, labelProbArray);
+    Log.e(TAG, "Inference done "+maxProbIndex(labelProbArray[0]));
+  }
+
+  // find max prob and digit
+  private  int maxProbIndex(float[] probs) {
+    int maxIndex = -1;
+    float maxProb = 0.0f;
+    for (int i = 0; i < probs.length; i++) {
+      if (probs[i] > maxProb) {
+        maxProb = probs[i];
+        maxIndex = i;
+      }
+    }
+    prob = maxProb;
+    digit = maxIndex;
+    return maxIndex;
+  }
+
+  //get predicted digit
+  public int getdigit()
+  {
+
+    return digit;
+  }
+  //get predicted  prob
+  public float getProb()
+  {
+
+    return prob;
+  }
+
 }
+

@@ -4,4 +4,10 @@
     <style name="MaterialTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowFullscreen">true</item>
     </style>
+
+    <style name="AppBaseTheme"></style>
+
+    <style name="FullscreenTheme"></style>
+
+    <style name="FullscreenActionBarStyle"></style>
 </resources>

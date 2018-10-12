@@ -2,7 +2,6 @@ package com.selfie.ibrahim.selfie_app;
 
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
-import android.os.SystemClock;
 import android.util.Log;
 
 import org.tensorflow.lite.Interpreter;
@@ -13,7 +12,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.List;
 
 /**
  * Created by rohithkvsp on 4/22/18.
